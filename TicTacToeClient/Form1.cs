@@ -12,24 +12,47 @@ public partial class Form1 : Form
     public string? X_O { get; set; }
 
     private List<Button>? buttons;
-    private bool choice, first = false;
+    private bool choice, flag = true;
     private int roomId;
-    string? response, request;
+    private string? response;
+    private Task? t;
     public Form1()
     {
         InitializeComponent();
-        buttons = new List<Button>()
-        {
-            button1,
-            button2,
-            button3,
-            button4,
-            button5,
-            button6,
-            button7,
-            button8,
-            button9
-        };
+    }
+
+    public void ChangeButtonTextEmpty()
+    {
+        if (buttons != null)
+            foreach (Button b in buttons)
+                b.Text = string.Empty;
+    }
+
+    public bool? PlayChecker()
+    {
+        if (button1.Text == X_O && button1.Text == button2.Text && button2.Text == button3.Text)
+            return true;
+        else if (button1.Text == X_O && button1.Text == button4.Text && button4.Text == button7.Text)
+            return true;
+        else if (button1.Text == X_O && button1.Text == button5.Text && button5.Text == button9.Text)
+            return true;
+        else if (button2.Text == X_O && button2.Text == button5.Text && button5.Text == button8.Text)
+            return true;
+        else if (button3.Text == X_O && button3.Text == button5.Text && button5.Text == button7.Text)
+            return true;
+        else if (button3.Text == X_O && button3.Text == button6.Text && button6.Text == button9.Text)
+            return true;
+        else if (button4.Text == X_O && button4.Text == button5.Text && button5.Text == button6.Text)
+            return true;
+        else if (button7.Text == X_O && button7.Text == button8.Text && button8.Text == button9.Text)
+            return true;
+        else if (button1.Text != string.Empty && button2.Text != string.Empty && button3.Text != string.Empty &&
+            button4.Text != string.Empty && button5.Text != string.Empty &&
+            button6.Text != string.Empty && button7.Text != string.Empty &&
+            button8.Text != string.Empty && button9.Text != string.Empty)
+            return null;
+        else
+            return false;
     }
 
     public void ButtonActivate()
@@ -37,14 +60,12 @@ public partial class Form1 : Form
         if (buttons != null)
             foreach (Button btn in buttons)
                 btn.Enabled = true;
-
     }
     public void ButtonDeactivate()
     {
         if (buttons != null)
             foreach (Button btn in buttons)
                 btn.Enabled = false;
-
     }
     public Button? ButtonChecker(string response)
     {
@@ -65,51 +86,68 @@ public partial class Form1 : Form
 
         return null;
     }
-
-    public void FirstClientConnection(Button btn)
+    public void ClientRequest(Button btn)
     {
         if (sw != null && sr != null)
         {
-            sw.WriteLine(btn.Name);
-            buttons?.Remove(btn);
-            Invoke(() =>
+            if (PlayChecker() == true)
             {
+                label5.Text = "You win game";
+                sw.WriteLine(btn.Name + '/');
+                buttons?.Remove(btn);
+
                 btn.Enabled = false;
-
                 ButtonDeactivate();
-            });
 
-            response = sr.ReadLine();
-            if (response != null)
-            {
-                buttons?.Remove(ButtonChecker(response) ?? new Button());
+                sr?.Close();
+                sw?.Close();
+
+                sr = null;
+                sw = null;
+                buttons?.Clear();
 
                 Invoke(() =>
                 {
-                    ButtonActivate();
+                    btn.Enabled = true;
+                    comboBox1.Enabled = true;
+                    textBox1.Enabled = true;
                 });
+            }
+            else if (PlayChecker() == false)
+            {
+                sw.WriteLine(btn.Name);
+                buttons?.Remove(btn);
+
+                Invoke(() =>
+                {
+                    btn.Enabled = false;
+                    ButtonDeactivate();
+                });
+            }
+            else
+            {
+                label5.Text = "Game is draw...";
+                sw.WriteLine(btn.Name + '=');
+                buttons?.Remove(btn);
+
+                btn.Enabled = false;
+                ButtonDeactivate();
+
+                sr?.Close();
+                sw?.Close();
+
+                sr = null;
+                sw = null;
+                buttons?.Clear();
+
+                btn.Enabled = true;
+                comboBox1.Enabled = true;
+                textBox1.Enabled = true;
             }
         }
     }
 
-    public void LastClientRequest(Button btn)
-    {
-        if (sw != null && sr != null)
-        {
-            sw.WriteLine(btn.Name);
-            buttons?.Remove(btn);
-            Invoke(() =>
-            {
-                btn.Enabled = false;
-                Invoke(() =>
-                {
-                    ButtonDeactivate();
-                });
-            });
-        }
-    }
-
-    public void LastClientResponse()
+    public void ClientResponse()
     {
         if (sw != null && sr != null)
         {
@@ -117,10 +155,70 @@ public partial class Form1 : Form
 
             if (response != null)
             {
-                Invoke(() =>
+                if (response.Last() == '/')
                 {
-                    buttons?.Remove(ButtonChecker(response) ?? new Button());
-                });
+                    response = response.Remove(response.Length - 1);
+
+                    Invoke(() =>
+                    {
+                        buttons?.Remove(ButtonChecker(response) ?? new Button());
+                        label5.Text = "Rival win...";
+                    });
+
+                    sw?.Close();
+                    sr?.Close();
+                    ns?.Close();
+                    client?.Close();
+
+                    sw = null;
+                    sr = null;
+                    ns = null;
+                    client = null;
+                    flag = false;
+                    buttons?.Clear();
+
+                    Invoke(() =>
+                    {
+                        btn.Enabled = true;
+                        comboBox1.Enabled = true;
+                        textBox1.Enabled = true;
+                    });
+                }
+                else if (response.Last() == '=')
+                {
+                    response = response.Remove(response.Length - 1);
+
+                    Invoke(() =>
+                    {
+                        buttons?.Remove(ButtonChecker(response) ?? new Button());
+                        label5.Text = "Game is draw...";
+                    });
+
+                    sw?.Close();
+                    sr?.Close();
+                    ns?.Close();
+                    client?.Close();
+
+                    sw = null;
+                    sr = null;
+                    ns = null;
+                    client = null;
+                    flag = false;
+                    buttons?.Clear();
+
+                    Invoke(() =>
+                    {
+                        btn.Enabled = true;
+                        comboBox1.Enabled = true;
+                        textBox1.Enabled = true;
+                    });
+                }
+                else
+                    Invoke(() =>
+                    {
+                        buttons?.Remove(ButtonChecker(response) ?? new Button());
+                        ButtonActivate();
+                    });
             }
         }
     }
@@ -155,6 +253,20 @@ public partial class Form1 : Form
 
                         if (c == '/')
                         {
+                            buttons = new List<Button>()
+                            {
+                                button1,
+                                button2,
+                                button3,
+                                button4,
+                                button5,
+                                button6,
+                                button7,
+                                button8,
+                                button9
+                            };
+                            ChangeButtonTextEmpty();
+
                             label2.Text = message.Remove(message.Length - 1);
 
                             comboBox1.Enabled = false;
@@ -167,49 +279,52 @@ public partial class Form1 : Form
                             label2.Text = arr![0];
                             label4.Text = arr[1];
 
-                            first = true;
+                            ButtonActivate();
+                            flag = true;
 
-                            await Task.Run(() =>
+                            t = new Task(() =>
                             {
-                                while (true)
+                                while (flag)
                                 {
-                                    LastClientResponse();
-
-                                    Invoke(() =>
-                                    {
-                                        ButtonActivate();
-                                    });
+                                    ClientResponse();
                                 }
                             });
 
-                            ButtonActivate();
-
-                            
+                            t.Start();
                         }
                         else if (c == '+')
                         {
+                            buttons = new List<Button>()
+                            {
+                                button1,
+                                button2,
+                                button3,
+                                button4,
+                                button5,
+                                button6,
+                                button7,
+                                button8,
+                                button9
+                            };
+                            ChangeButtonTextEmpty();
+
                             label2.Text = message.Remove(message.Length - 1);
 
                             comboBox1.Enabled = false;
                             button.Enabled = false;
                             textBox1.Enabled = false;
-                            first = false;
+                            flag = true;
 
-                            ButtonActivate();
-
-                            await Task.Run(() =>
+                            t = new Task(() =>
                             {
-                                while (true)
+                                while (flag)
                                 {
-                                    LastClientResponse();
+                                    ClientResponse();
 
-                                    Invoke(() =>
-                                    {
-                                        ButtonActivate();
-                                    });
                                 }
                             });
 
+                            t.Start();
                         }
                         else if (c == '-')
                         {
@@ -255,18 +370,8 @@ public partial class Form1 : Form
         else if (button != null && button != btn)
         {
             button.Text = X_O;
-
-            if (first)
-            {
-                LastClientRequest(button);
-            }
-            else
-            {
-                LastClientRequest(button);
-            }
-
+            if (sw != null)
+                ClientRequest(button);
         }
-
-
     }
 }

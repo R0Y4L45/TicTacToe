@@ -47,6 +47,7 @@
             label2 = new Label();
             label3 = new Label();
             label4 = new Label();
+            label5 = new Label();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -308,6 +309,16 @@
             label4.Size = new Size(0, 32);
             label4.TabIndex = 31;
             // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Font = new Font("Segoe UI", 18F, FontStyle.Regular, GraphicsUnit.Point);
+            label5.Location = new Point(5, 135);
+            label5.Name = "label5";
+            label5.Size = new Size(82, 32);
+            label5.TabIndex = 32;
+            label5.Text = "Turn : ";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -315,6 +326,7 @@
             AutoSize = true;
             BackColor = Color.LightSteelBlue;
             ClientSize = new Size(595, 768);
+            Controls.Add(label5);
             Controls.Add(label4);
             Controls.Add(label3);
             Controls.Add(comboBox1);
@@ -352,5 +364,6 @@
         private Label label2;
         private Label label3;
         private Label label4;
+        private Label label5;
     }
 }

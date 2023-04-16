@@ -49,16 +49,55 @@ void Method(int roomId)
 
         while (true)
         {
-
             response_First = rStream_First.ReadLine();
-            wStream_Last.WriteLine(response_First);
+            if (response_First != null)
+            {
+                if (response_First.Last() == '/')
+                {
+                    wStream_Last.WriteLine(response_First);
+                    break;
+                }
+                else if(response_First.Last() == '=')
+                {
+                    wStream_Last.WriteLine(response_First);
+                    break;
+                }
+                else
+                    wStream_Last.WriteLine(response_First);
+            }
 
             response_Last = rStream_Last.ReadLine();
-            wStream_First.WriteLine(response_Last);
-
-            response_First = default;
-            response_Last = default;
+            if (response_Last != null)
+            {
+                if (response_Last.Last() == '/')
+                {
+                    wStream_First.WriteLine(response_Last);
+                    break;
+                }
+                else if(response_Last.Last() == '=')
+                {
+                    wStream_First.WriteLine(response_Last);
+                    break;
+                }
+                else
+                    wStream_First.WriteLine(response_Last);
+            }
         }
+
+        rStream_First.Close();
+        wStream_First.Close();
+        nStream_First.Close();
+        Console.WriteLine($"Client disconnected : {clientFirst.Client?.Client.RemoteEndPoint}");
+        clientFirst.Client?.Close();
+
+        rStream_Last.Close();
+        wStream_Last.Close();
+        nStream_Last.Close();
+        Console.WriteLine($"Client disconnected : {clientLast.Client?.Client.RemoteEndPoint}");
+        clientLast.Client?.Close();
+
+        if(dic.Remove(roomId))
+            Console.WriteLine($"{roomId} is empty...");
     }
 };
 
